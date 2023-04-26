@@ -154,14 +154,15 @@ def matrix_property(matrix, file, output_file, plot_data_flag = 0):
     # min_eigenvalue = eigs(matrix, k=2, return_eigenvectors=False, which='SM')
     
     diag = matrix.diagonal()
-    diag_max = max(diag)
-    diag_min = min(diag)
+    diag_max = max(diag, default = 0)
+    diag_min = min(diag, default = 0)
     num_diag_pos = np.array([diag > 0]).sum()
     num_diag_neg = np.array([diag < 0]).sum()
 
+    matrix.eliminate_zeros()   # remove zero entries
     nnz_per_row = matrix.getnnz(axis=1)
-    nnz_per_row_max = max(nnz_per_row)
-    nnz_per_row_min = min(nnz_per_row)
+    nnz_per_row_max = max(nnz_per_row, default = 0)
+    nnz_per_row_min = min(nnz_per_row, default = 0)
     
     bins_lower = int(np.floor(nnz_per_row_min))
     bins_upper = int(np.ceil(nnz_per_row_max))
@@ -181,9 +182,9 @@ def matrix_property(matrix, file, output_file, plot_data_flag = 0):
     ## Off diagonal
     zero_diag_matrix = matrix - coo_matrix((diag, (range(size), range(size))), shape=(size, size))
 
-    offdiag_max = max(abs(zero_diag_matrix.data))
-    offdiag_min = min(abs(zero_diag_matrix.data))
-    offdiag_min_act = min(zero_diag_matrix.data)
+    offdiag_max = max(abs(zero_diag_matrix.data), default = 0)
+    offdiag_min = min(abs(zero_diag_matrix.data), default = 0)
+    offdiag_min_act = min(zero_diag_matrix.data, default = 0)
 
     row_ptr = zero_diag_matrix.indptr
     # off-diag values
@@ -238,8 +239,8 @@ def matrix_property(matrix, file, output_file, plot_data_flag = 0):
     for i in range(len(row_ptr)-1):
         row_data = matrix.data[row_ptr[i]:row_ptr[i+1]]
         row_data = row_data[row_data != 0]
-        max_row_data = max(abs(row_data))
-        min_row_data = min(abs(row_data))
+        max_row_data = max(abs(row_data), default = 0)
+        min_row_data = min(abs(row_data), default = 0)
         if (min_row_data) :
             ratio = max_row_data / min_row_data
             ratio_row.append(ratio)
@@ -265,8 +266,8 @@ def matrix_property(matrix, file, output_file, plot_data_flag = 0):
     ## Multiscale row 
     row = np.where(np.log10(ratio_row)>(bins_upper-1))[0][0]
     data_row = matrix.data[row_ptr[row]:row_ptr[row+1]]
-    max_data_row = max(abs(data_row))
-    min_data_row = min(abs(data_row))
+    max_data_row = max(abs(data_row), default = 0)
+    min_data_row = min(abs(data_row), default = 0)
 
     ## print
     temp = sys.stdout
@@ -292,7 +293,7 @@ def matrix_property(matrix, file, output_file, plot_data_flag = 0):
     print("----------------------------------------------")
     print("num of rows(diag dominant):".ljust(30) + "\t %d (%.2f%%)" % (num_equal_diag_dominant , num_equal_diag_dominant/size*100))
     print("num of rows(strictly dd):".ljust(30) + "\t %d (%.2f%%)" % (num_diag_dominant , num_diag_dominant/size*100))
-    print("num of rows(strictly non-dd):".ljust(30) + "\t %d" % num_diag_non_dominant)
+    print("num of rows(non strictly dd):".ljust(30) + "\t %d" % num_diag_non_dominant)
     print("num of rows(Z-property):".ljust(30) + "\t %d " % (num_Z_row))
     print("num of rows(dd && Z-property):".ljust(30) + "\t %d" % (num_dd_Z_row))       
     print("----------------------------------------------")
