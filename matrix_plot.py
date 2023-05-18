@@ -146,6 +146,9 @@ def plot_matrix_data_log(val, refine, bins_lower, bins_upper, save_flag = 0, tit
 ######   Analyze matrix  ############
 def matrix_property(matrix, file, output_file, plot_data_flag = 0):
     size = matrix.shape[0]
+    matrix = matrix.tocsr()
+    matrix.eliminate_zeros()   # remove zero entries
+    
     num_nonzeros = matrix.count_nonzero()
     print("size of matrix %s: %d" % (file, size))
     print("nnz of matrix %s : %d\n" % (file, num_nonzeros))
@@ -159,7 +162,6 @@ def matrix_property(matrix, file, output_file, plot_data_flag = 0):
     num_diag_pos = np.array([diag > 0]).sum()
     num_diag_neg = np.array([diag < 0]).sum()
 
-    matrix.eliminate_zeros()   # remove zero entries
     nnz_per_row = matrix.getnnz(axis=1)
     nnz_per_row_max = max(nnz_per_row, default = 0)
     nnz_per_row_min = min(nnz_per_row, default = 0)
@@ -236,18 +238,21 @@ def matrix_property(matrix, file, output_file, plot_data_flag = 0):
     ratio_max = 0
     ratio_min = 0xFFFFFFF
     ratio_row = []
+    row_ptr = matrix.indptr
     for i in range(len(row_ptr)-1):
         row_data = matrix.data[row_ptr[i]:row_ptr[i+1]]
         row_data = row_data[row_data != 0]
         max_row_data = max(abs(row_data), default = 0)
         min_row_data = min(abs(row_data), default = 0)
-        if (min_row_data) :
+        if (min_row_data != 0) :
             ratio = max_row_data / min_row_data
             ratio_row.append(ratio)
             if (ratio > ratio_max):
                 ratio_max = ratio
             if (ratio < ratio_min):
                 ratio_min = ratio
+        else:
+            ratio_row.append(0)
 
     bins_lower = int(np.floor(np.log10(ratio_min)))
     bins_upper = int(np.ceil(np.log10(ratio_max)))
@@ -264,7 +269,7 @@ def matrix_property(matrix, file, output_file, plot_data_flag = 0):
         plot_matrix_data_log(ratio_row, refine, bins_lower, bins_upper, 1, "ratio of value per row", "%s_ratio" % file)
     
     ## Multiscale row 
-    row = np.where(np.log10(ratio_row)>(bins_upper-1))[0][0]
+    row = np.where(ratio_row==max(ratio_row))[0][0]
     data_row = matrix.data[row_ptr[row]:row_ptr[row+1]]
     max_data_row = max(abs(data_row), default = 0)
     min_data_row = min(abs(data_row), default = 0)
@@ -337,7 +342,7 @@ def matrix_property(matrix, file, output_file, plot_data_flag = 0):
     sys.stdout = temp
 
 if __name__ == "__main__":
-    trans_matrix = 1
+    trans_matrix = 0
     complex_matrix = 0
     subspace_matrix = 9
     
@@ -351,10 +356,10 @@ if __name__ == "__main__":
                 '/home/dyt/matrix/filter_matrix_hypre/subspace/matrix_A_Pix.00000',
                 '/home/dyt/matrix/filter_matrix_hypre/subspace/matrix_A_Piy.00000',
                 '/home/dyt/matrix/filter_matrix_hypre/subspace/matrix_A_Piz.00000',
-                '/home/dyt/matrix/SPD_matrix_hypre/subspace/matrix_A_G.00000',
-                '/home/dyt/matrix/SPD_matrix_hypre/subspace/matrix_A_Pix.00000',
-                '/home/dyt/matrix/SPD_matrix_hypre/subspace/matrix_A_Piy.00000',
-                '/home/dyt/matrix/SPD_matrix_hypre/subspace/matrix_A_Piz.00000']
+                '/home/dyt/matrix/SPD_matrix_hypre/subspace/refine_%d/matrix_A_G.00000' % refine,
+                '/home/dyt/matrix/SPD_matrix_hypre/subspace/refine_%d/matrix_A_Pix.00000' % refine,
+                '/home/dyt/matrix/SPD_matrix_hypre/subspace/refine_%d/matrix_A_Piy.00000' % refine,
+                '/home/dyt/matrix/SPD_matrix_hypre/subspace/refine_%d/matrix_A_Piz.00000' % refine]
 
     save_matrix_path = ['/home/dyt/matrix/filter_matrix_python/refine_%d/M.npz' % refine, 
                         '/home/dyt/matrix/filter_matrix_python/refine_%d/A_real.npz' % refine,

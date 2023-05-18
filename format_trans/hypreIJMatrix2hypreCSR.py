@@ -1,8 +1,10 @@
 #!/bin/python3
 
-####################
-#    Date : 2023.3
-####################
+########################################
+#    Date  : 2023.3
+#    Input : hypre_IJ format matrix
+#    Output: hypre_CSR format matrix
+########################################
 
 import os
 import re

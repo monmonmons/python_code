@@ -34,7 +34,7 @@ if __name__=="__main__":
     
     if filter == 0:
         
-        refine = 1
+        refine = 2
 
         vector = ['/home/dyt/matrix/SPD_ams/refine_%d/hypre_x.00000' % refine,
                   '/home/dyt/matrix/SPD_ams/refine_%d/hypre_y.00000' % refine,
@@ -47,7 +47,7 @@ if __name__=="__main__":
                        '/home/dyt/matrix/SPD_matrix_hypre/refine_%d/seq_b' % refine]
 
     else :
-        refine = 0
+        refine = 1
 
         vector = [
                 '/home/dyt/matrix/filter_ams/refine_%d/hypre_x.00000' % refine,

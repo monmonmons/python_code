@@ -102,7 +102,7 @@ if __name__=="__main__":
                     '/home/dyt/matrix/filter_matrix_hypre/refine_%d/hypre_CSR.G' % refine]
     
     else :
-        refine = 1
+        refine = 2
         
         matrix = ['/home/dyt/matrix/SPD_ams/refine_%d/hypre_IJ.A.00000' % refine,
                         '/home/dyt/matrix/SPD_ams/refine_%d/hypre_IJ.G.00000' % refine]
